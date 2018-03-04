@@ -354,10 +354,14 @@ def tethercalc(report, fight_id):
         # Add to results
         timing = timedelta(milliseconds=tether['start']-encounter_start)
 
-        if damage_list[0][0] == tether['source']:
-            correct = friends[damage_list[1][0]]['name']
-        else:
-            correct = friends[damage_list[0][0]]['name']
+        # Determine the correct target, the top non-self non-limit combatant
+        for top in damage_list:
+            if top[0] != tether['source'] and friends[top[0]]['type'] != 'LimitBreak':
+                correct = friends[top[0]]['name']
+                break
+
+        if not correct:
+            correct = 'Nobody?'
         
         results.append({
             'damages': damage_list,
