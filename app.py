@@ -1,8 +1,9 @@
 import os
+from urllib.parse import urlparse, parse_qs
 
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from tethercalc import tethercalc
+from tethercalc import tethercalc, get_last_fight_id
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -15,12 +16,26 @@ class Report(db.Model):
     results = db.Column(db.JSON)
     friends = db.Column(db.JSON)
 
+def decompose_url(url):
+    parts = urlparse(url)
+
+    report_id = parts.path.split('/')[-1]
+    fight_id = parse_qs(parts.fragment)['fight'][0]
+
+    if fight_id == 'last':
+        fight_id = get_last_fight_id(report_id)
+
+    fight_id = int(fight_id)
+
+    return report_id, fight_id
+
+
 @app.route('/', methods=['GET', 'POST'])
 def homepage():
     """Simple form for redirecting to a report, no validation"""
     if request.method == 'POST':
-        report_id = request.form['report_id']
-        fight_id = request.form['fight_id']
+        report_url = request.form['report_url']
+        report_id, fight_id = decompose_url(report_url)
         return redirect(url_for('calc', report_id=report_id, fight_id=fight_id))
 
     return render_template('home.html')

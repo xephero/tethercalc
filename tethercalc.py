@@ -376,3 +376,8 @@ def tethercalc(report, fight_id):
         })
 
     return results, friends
+
+def get_last_fight_id(report):
+    report_data = fflogs_api('fights', report)
+
+    return report_data['fights'][-1]['id']
