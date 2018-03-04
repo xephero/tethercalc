@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for result in results %}
+    <div class="row">
+        <div class="col">
+            <p>{{ friends[result['source']]['name'] }} tethered {{ friends[result['target']]['name'] }} at {{ result.timing }}</p>
+            <p>The correct target was {{ result['correct'] }}</p>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Player</th>
+                        <th scope="col">Job</th>
+                        <th scope="col">Damage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for damage in result['damages'] %}
+                        <tr>
+                            <td>{{ friends[damage[0]]['name'] }}</td>
+                            <td>{{ friends[damage[0]]['type'] }}</td>
+                            <td>{{ damage[1] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <hr>
+    </div>
+    {% endfor %}
+{% endblock %}
