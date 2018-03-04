@@ -329,8 +329,7 @@ def tethercalc(report, fight_id):
     tethers = get_tethers(report, encounter_start, encounter_end)
 
     if not tethers:
-        print("No tethers found")
-        return 0
+        raise TetherCalcException("No tethers found in fight")
 
     # Results
     results = []
