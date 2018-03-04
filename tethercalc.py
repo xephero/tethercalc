@@ -232,13 +232,16 @@ def get_tick_damages(report, start, end):
 
             # Only damage on the WF target by the player, not the turret
             options['filter'] = 'source.type!="pet"'
-            options['filter'] += ' and source.id=' + source
-            options['filter'] += ' and target.id=' + wildfire['target']
+            options['filter'] += ' and source.id=' + str(source)
+            options['filter'] += ' and target.id=' + str(wildfire['target'])
 
             wildfire_data = fflogs_api('tables/damage-done', report, options)
 
             # Filter is strict enough that we can just use the number directly
-            tick_damage[source] += int(0.25 * wildfire_data['entries'][0]['total'])
+            if source in tick_damage:
+                tick_damage[source] += int(0.25 * wildfire_data['entries'][0]['total'])
+            else:
+                tick_damage[source] = int(0.25 * wildfire_data['entries'][0]['total'])
 
     return tick_damage
 

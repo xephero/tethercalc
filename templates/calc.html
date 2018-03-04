@@ -17,11 +17,13 @@
                 </thead>
                 <tbody>
                     {% for damage in result['damages'] %}
+                    {% if damage[0] != result['source'] and friends[damage[0]]['type'] != 'LimitBreak' %}
                         <tr>
                             <td>{{ friends[damage[0]]['name'] }}</td>
                             <td>{{ friends[damage[0]]['type'] }}</td>
                             <td>{{ damage[1] }}</td>
                         </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
