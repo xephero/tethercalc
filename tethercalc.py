@@ -224,7 +224,7 @@ def get_tick_damages(report, start, end):
                 wildfire['start'] = start
             # If wildfire ended after dragon sight, the end will be tether end
             if wildfire['end'] > end:
-                wildfire['end'] = end
+                wildfire['end'] = end + 750
 
             # Set up query for applicable mch damage
             options['start'] = wildfire['start']
