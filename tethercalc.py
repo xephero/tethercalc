@@ -237,8 +237,12 @@ def get_tick_damages(report, start, end):
 
             wildfire_data = fflogs_api('tables/damage-done', report, options)
 
+            # If there's 0 damage there won't be any entries
+            if not len(wildfire_data['entries']):
+                pass
+
             # Filter is strict enough that we can just use the number directly
-            if source in tick_damage:
+            elif source in tick_damage:
                 tick_damage[source] += int(0.25 * wildfire_data['entries'][0]['total'])
             else:
                 tick_damage[source] = int(0.25 * wildfire_data['entries'][0]['total'])
