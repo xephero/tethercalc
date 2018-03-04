@@ -11,6 +11,9 @@ except ImportError:
     raise ImportError("FFlogs parsing requires the Requests module for python."
                       "Run the following to install it:\n    python -m pip install requests")
 
+class TetherCalcException(Exception):
+    pass
+
 def fflogs_fetch(api_url, options):
     """
     Gets a url and handles any API errors
@@ -23,14 +26,14 @@ def fflogs_fetch(api_url, options):
     try:
         response_dict = response.json()
     except:
-        raise Exception('Could not parse response: ' + response.text)
+        raise TetherCalcException('Could not parse response: ' + response.text)
 
     # Handle bad request
     if response.status_code != 200:
         if 'error' in response_dict:
-            raise Exception('FFLogs error: ' + response_dict['error'])
+            raise TetherCalcException('FFLogs error: ' + response_dict['error'])
         else:
-            raise Exception('Unexpected FFLogs error: ' + response.text)
+            raise TetherCalcException('Unexpected FFLogs error: ' + response.text)
 
     return response_dict
 
@@ -314,7 +317,7 @@ def tethercalc(report, fight_id):
     fight = [fight for fight in report_data['fights'] if fight['id'] == fight_id][0]
 
     if not fight:
-        raise Exception("Fight ID not found in report")
+        raise TetherCalcException("Fight ID not found in report")
 
     encounter_start = fight['start_time']
     encounter_end = fight['end_time']
