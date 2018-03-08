@@ -19,21 +19,22 @@ def fflogs_fetch(api_url, options):
     Gets a url and handles any API errors
     """
     options['api_key'] = os.environ['FFLOGS_API_KEY']
+    options['translate'] = True
 
     response = requests.get(api_url, params=options)
-
-    # Handle non-JSON response
-    try:
-        response_dict = response.json()
-    except:
-        raise TetherCalcException('Could not parse response: ' + response.text)
 
     # Handle bad request
     if response.status_code != 200:
         if 'error' in response_dict:
             raise TetherCalcException('FFLogs error: ' + response_dict['error'])
         else:
-            raise TetherCalcException('Unexpected FFLogs error: ' + response.text)
+            raise TetherCalcException('Unexpected FFLogs response code: ' + response.status_code)
+
+    # Handle non-JSON response
+    try:
+        response_dict = response.json()
+    except:
+        raise TetherCalcException('Could not parse response: ' + response.text)
 
     return response_dict
 
