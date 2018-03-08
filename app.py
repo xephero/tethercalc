@@ -19,7 +19,7 @@ class Report(db.Model):
 def decompose_url(url):
     parts = urlparse(url)
 
-    report_id = parts.path.split('/')[-1]
+    report_id = [segment for segment in parts.path.split('/') if segment][-1]
     try:
         fight_id = parse_qs(parts.fragment)['fight'][0]
     except KeyError:
