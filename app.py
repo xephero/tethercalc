@@ -48,6 +48,10 @@ def homepage():
 
     return render_template('home.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/<string:report_id>/<int:fight_id>')
 def calc(report_id, fight_id):
     """The actual calculated results view"""
