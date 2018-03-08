@@ -354,7 +354,8 @@ def tethercalc(report, fight_id):
         real_damages = get_real_damages(damages, tick_damages)
 
         # Remove dragon sight bonus on target that actually got it
-        real_damages[tether['target']] = int(real_damages[tether['target']] / 1.05)
+        if tether['target'] in real_damages:
+            real_damages[tether['target']] = int(real_damages[tether['target']] / 1.05)
 
         # Order into a list of tuples
         damage_list = sorted(real_damages.items(), key=lambda dmg: dmg[1], reverse=True)
