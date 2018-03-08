@@ -50,7 +50,7 @@ def homepage():
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('about.html', report_count=Report.query.count())
 
 @app.route('/<string:report_id>/<int:fight_id>')
 def calc(report_id, fight_id):
