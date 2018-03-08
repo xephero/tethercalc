@@ -3,6 +3,7 @@ from urllib.parse import urlparse, parse_qs
 
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from tethercalc import tethercalc, get_last_fight_id, TetherCalcException
 
 app = Flask(__name__)
@@ -70,7 +71,12 @@ def calc(report_id, fight_id):
             fight_id=fight_id,
             results=results,
             friends=friends)
-        db.session.add(report)
-        db.session.commit()
+        try:
+            db.session.add(report)
+            db.session.commit()
+        except IntegrityError as exception:
+            # This was likely added while tethercalc was running,
+            # in which case we don't need to do anything besides redirect
+            pass
 
     return render_template('calc.html', results=results, friends=friends)
