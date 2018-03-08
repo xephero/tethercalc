@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse, parse_qs
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from tethercalc import tethercalc, get_last_fight_id, TetherCalcException
@@ -51,6 +51,10 @@ def homepage():
 @app.route('/about')
 def about():
     return render_template('about.html', report_count=Report.query.count())
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/png')
 
 @app.route('/<string:report_id>/<int:fight_id>')
 def calc(report_id, fight_id):
