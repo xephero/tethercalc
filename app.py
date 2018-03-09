@@ -79,7 +79,7 @@ def calc(report_id, fight_id):
             db.session.commit()
 
         # These get returned with string keys, so have to massage it some
-        report.friends = {int(k):v for k,v in report.friends.items()}
+        friends = {int(k):v for k,v in report.friends.items()}
 
     else:
         try:
@@ -101,4 +101,4 @@ def calc(report_id, fight_id):
             # in which case we don't need to do anything besides redirect
             pass
 
-    return render_template('calc.html', report=report)
+    return render_template('calc.html', report=report, friends=friends)

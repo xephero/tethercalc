@@ -12,13 +12,13 @@
     <div class="row result-row mb-2 p-2">
         <div class="col">
             <p>
-                <span class="badge badge-secondary">{{ report.friends[result['source']]['name'] }}</span>
+                <span class="badge badge-secondary">{{ friends[result['source']]['name'] }}</span>
                 tethered
-                <span class="badge badge-secondary">{{ report.friends[result['target']]['name'] }}</span>
+                <span class="badge badge-secondary">{{ friends[result['target']]['name'] }}</span>
                 at
                 <span class="badge badge-secondary">{{ result.timing }}</span>
             </p>
-            <p>The correct target was <span class="badge badge-{% if report.friends[result['target']]['name'] == result['correct'] %}success{% else %}danger{% endif %}">{{ result['correct'] }}</span></p>
+            <p>The correct target was <span class="badge badge-{% if friends[result['target']]['name'] == result['correct'] %}success{% else %}danger{% endif %}">{{ result['correct'] }}</span></p>
 
             <table class="table table-striped">
                 <thead>
@@ -30,10 +30,10 @@
                 </thead>
                 <tbody>
                     {% for damage in result['damages'] %}
-                    {% if damage[0] != result['source'] and report.friends[damage[0]]['type'] != 'LimitBreak' %}
+                    {% if damage[0] != result['source'] and friends[damage[0]]['type'] != 'LimitBreak' %}
                         <tr>
-                            <td>{{ report.friends[damage[0]]['name'] }}</td>
-                            <td>{{ report.friends[damage[0]]['type'] }}</td>
+                            <td>{{ friends[damage[0]]['name'] }}</td>
+                            <td>{{ friends[damage[0]]['type'] }}</td>
                             <td>{{ damage[1] }}</td>
                         </tr>
                     {% endif %}
