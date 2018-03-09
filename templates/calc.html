@@ -11,8 +11,14 @@
     {% for result in report.results %}
     <div class="row result-row mb-2 p-2">
         <div class="col">
-            <p>{{ report.friends[result['source']]['name'] }} tethered {{ report.friends[result['target']]['name'] }} at {{ result.timing }}</p>
-            <p>The correct target was {{ result['correct'] }}</p>
+            <p>
+                <span class="badge badge-secondary">{{ report.friends[result['source']]['name'] }}</span>
+                tethered
+                <span class="badge badge-secondary">{{ report.friends[result['target']]['name'] }}</span>
+                at
+                <span class="badge badge-secondary">{{ result.timing }}</span>
+            </p>
+            <p>The correct target was <span class="badge badge-{% if report.friends[result['target']]['name'] == result['correct'] %}success{% else %}danger{% endif %}">{{ result['correct'] }}</span></p>
 
             <table class="table table-striped">
                 <thead>
