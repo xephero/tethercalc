@@ -324,6 +324,14 @@ def tethercalc(report, fight_id):
     encounter_start = fight['start_time']
     encounter_end = fight['end_time']
 
+    encounter_timing = timedelta(milliseconds=fight['end_time']-fight['start_time'])
+
+    encounter_info = {
+        'enc_name': fight['name'],
+        'enc_time': str(encounter_timing)[2:11],
+        'enc_kill': fight['kill'] if 'kill' in fight else False,
+    }
+
     # Create a friend dict to track source IDs
     friends = {friend['id']: friend for friend in report_data['friendlies']}
 
@@ -380,9 +388,25 @@ def tethercalc(report, fight_id):
             'correct': correct
         })
 
-    return results, friends
+    return results, friends, encounter_info
 
 def get_last_fight_id(report):
+    """Get the last fight in the report"""
     report_data = fflogs_api('fights', report)
 
     return report_data['fights'][-1]['id']
+
+def get_encounter_info(report, fight_id):
+    """Get the encounter information about a report"""
+    report_data = fflogs_api('fights', report)
+
+    fight = [fight for fight in report_data['fights'] if fight['id'] == fight_id][0]
+    timing = timedelta(milliseconds=fight['end_time']-fight['start_time'])
+
+    encounter_info = {
+        'enc_name': fight['name'],
+        'enc_time': str(timing)[2:11],
+        'enc_kill': fight['kill'] if 'kill' in fight else False,
+    }
+
+    return encounter_info

@@ -1,10 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for result in results %}
     <div class="row">
+        <div class="card mb-4 p-2">
+            <h5 class="card-title {% if report.enc_kill %}text-success{% else %}text-danger{% endif %}">{{ report.enc_name }}</h5>
+            <h6 class="card-subtitle mb-2">{{ report.enc_time }}</h6>
+            <a class="card-link" href="https://www.fflogs.com/reports/{{ report.report_id}}#fight={{ report.fight_id }}">Original log</a>
+        </div>
+    </div>
+    {% for result in report.results %}
+    <div class="row result-row mb-2 p-2">
         <div class="col">
-            <p>{{ friends[result['source']]['name'] }} tethered {{ friends[result['target']]['name'] }} at {{ result.timing }}</p>
+            <p>{{ report.friends[result['source']]['name'] }} tethered {{ report.friends[result['target']]['name'] }} at {{ result.timing }}</p>
             <p>The correct target was {{ result['correct'] }}</p>
 
             <table class="table table-striped">
@@ -17,10 +24,10 @@
                 </thead>
                 <tbody>
                     {% for damage in result['damages'] %}
-                    {% if damage[0] != result['source'] and friends[damage[0]]['type'] != 'LimitBreak' %}
+                    {% if damage[0] != result['source'] and report.friends[damage[0]]['type'] != 'LimitBreak' %}
                         <tr>
-                            <td>{{ friends[damage[0]]['name'] }}</td>
-                            <td>{{ friends[damage[0]]['type'] }}</td>
+                            <td>{{ report.friends[damage[0]]['name'] }}</td>
+                            <td>{{ report.friends[damage[0]]['type'] }}</td>
                             <td>{{ damage[1] }}</td>
                         </tr>
                     {% endif %}
