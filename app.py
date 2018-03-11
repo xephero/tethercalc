@@ -1,10 +1,11 @@
+from datetime import datetime
 import os
 from urllib.parse import urlparse, parse_qs
 
 from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
-from tethercalc import tethercalc, get_encounter_info, get_last_fight_id, TetherCalcException
+from tethercalc import tethercalc, get_last_fight_id, TetherCalcException
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -19,6 +20,7 @@ class Report(db.Model):
     enc_name = db.Column(db.String(64))
     enc_time = db.Column(db.String(9))
     enc_kill = db.Column(db.Boolean)
+    computed = db.Column(db.DateTime, server_default=db.func.now())
 
 def decompose_url(url):
     parts = urlparse(url)
@@ -69,13 +71,20 @@ def calc(report_id, fight_id):
     report = Report.query.filter_by(report_id=report_id, fight_id=fight_id).first()
 
     if report:
-        # Get encounter info if it doesn't exist yet
-        if not report.enc_name or not report.enc_time or not report.enc_kill:
-            encounter_info = get_encounter_info(report_id, fight_id)
+        # Recompute if no computed timestamp
+        if not report.computed:
+            try:
+                results, friends, encounter_info = tethercalc(report_id, fight_id)
+            except TetherCalcException as exception:
+                return render_template('error.html', exception=exception)
 
+            report.results = results
+            report.friends = friends
             report.enc_name = encounter_info['enc_name']
             report.enc_time = encounter_info['enc_time']
             report.enc_kill = encounter_info['enc_kill']
+            report.computed = datetime.now()
+
             db.session.commit()
 
         # These get returned with string keys, so have to massage it some

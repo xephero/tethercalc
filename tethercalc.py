@@ -166,11 +166,15 @@ def get_tick_damages(report, start, end):
                 wildfire = {}
 
             if event['type'] == 'applydebuff':
-                wildfire['start'] = event['timestamp']
+                if 'start' not in wildfire:
+                    wildfire['start'] = event['timestamp']
             elif event['type'] == 'removedebuff':
-                wildfire['end'] = event['timestamp']
+                if 'end' not in wildfire:
+                    # Effective WF duration is 9.25
+                    wildfire['end'] = event['timestamp'] - 750
             elif event['type'] == 'damage':
-                wildfire['damage'] = event['amount']
+                if 'damage' not in wildfire:
+                    wildfire['damage'] = event['amount']
 
             wildfire['target'] = event['targetID']
 
@@ -229,11 +233,11 @@ def get_tick_damages(report, start, end):
                 wildfire['start'] = start
             # If wildfire ended after dragon sight, the end will be tether end
             if wildfire['end'] > end:
-                wildfire['end'] = end + 750
+                wildfire['end'] = end
 
             # Set up query for applicable mch damage
             options['start'] = wildfire['start']
-            options['end'] = wildfire['end'] - 750 # Real WF effect is only 9.25s
+            options['end'] = wildfire['end']
 
             # Only damage on the WF target by the player, not the turret
             options['filter'] = 'source.type!="pet"'
@@ -395,18 +399,3 @@ def get_last_fight_id(report):
     report_data = fflogs_api('fights', report)
 
     return report_data['fights'][-1]['id']
-
-def get_encounter_info(report, fight_id):
-    """Get the encounter information about a report"""
-    report_data = fflogs_api('fights', report)
-
-    fight = [fight for fight in report_data['fights'] if fight['id'] == fight_id][0]
-    timing = timedelta(milliseconds=fight['end_time']-fight['start_time'])
-
-    encounter_info = {
-        'enc_name': fight['name'],
-        'enc_time': str(timing)[2:11],
-        'enc_kill': fight['kill'] if 'kill' in fight else False,
-    }
-
-    return encounter_info
