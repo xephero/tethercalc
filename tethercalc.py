@@ -100,9 +100,11 @@ def get_tethers(report, start, end):
             })
         # If removing the buff, add an end timestamp to the matching application
         elif event['type'] == 'removebuff':
-            tether = [tether
+            tether_set = [tether
                       for tether in tethers
-                      if tether['source'] == event['sourceID'] and 'end' not in tether][0]
+                      if tether['source'] == event['sourceID'] and 'end' not in tether]
+            if tether_set:
+                tether = tether_set[0]
 
             tether['end'] = event['timestamp']
 
