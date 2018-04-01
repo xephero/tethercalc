@@ -12,6 +12,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+LAST_CALC_DATE = datetime.fromtimestamp(1522550000)
+
 class Report(db.Model):
     report_id = db.Column(db.String(16), primary_key=True)
     fight_id = db.Column(db.Integer, primary_key=True)
@@ -72,7 +74,7 @@ def calc(report_id, fight_id):
 
     if report:
         # Recompute if no computed timestamp
-        if not report.computed:
+        if not report.computed or report.computed < LAST_CALC_DATE:
             try:
                 results, friends, encounter_info = tethercalc(report_id, fight_id)
             except TetherCalcException as exception:

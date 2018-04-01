@@ -138,10 +138,35 @@ def get_tick_damages(report, start, end):
     options = {
         'start': start,
         'end': end + 60000, # 60s is the longest dot
-        'filter': 'source.type="player" and ((type="applydebuff" '
-                  'or type="refreshdebuff" or type="removedebuff") '
-                  'or isTick="true" and type="damage" and target.disposition="enemy" '
-                  'and ability.name!="Combined DoTs")'
+        'filter': """
+            source.type="player" and
+            ability.id not in (1000493, 1000819, 1000820, 1001203, 1000821, 1000140, 1001195, 1001291, 1001221)
+            and (
+                (
+                    type="applydebuff" or type="refreshdebuff" or type="removedebuff"
+                ) or (
+                    isTick="true" and
+                    type="damage" and
+                    target.disposition="enemy" and
+                    ability.name!="Combined DoTs"
+                ) or (
+                    (
+                        type="applybuff" or type="refreshbuff" or type="removebuff"
+                    ) and (
+                        ability.id=1000190 or ability.id=1000749 or ability.id=1000501
+                    )
+                ) or (
+                    type="damage" and ability.id=799
+                )
+            )
+        """
+        # Filter explanation:
+        # 1. source.type is player because tether doesn't affect pets or npcs
+        # 2. exclude non-dot debuff events like foe req that spam event log to minimize requests
+        # 3. include debuff events
+        # 4. include individual dot ticks on enemy
+        # 5. include only buffs corresponding to ground effect dots
+        # 6. include radiant shield damage
     }
 
     tick_data = fflogs_api('events', report, options)
@@ -184,27 +209,34 @@ def get_tick_damages(report, start, end):
             continue
 
         # Debuff applications inside window
-        if event['type'] in ['applydebuff', 'refreshdebuff'] and event['timestamp'] < end:
+        if event['type'] in ['applydebuff', 'refreshdebuff', 'applybuff', 'refreshbuff'] and event['timestamp'] < end:
             # Add to active if not present
             if action not in active_debuffs:
                 active_debuffs.append(action)
 
         # Debuff applications outside window
-        elif event['type'] in ['applydebuff', 'refreshdebuff'] and event['timestamp'] > end:
+        elif event['type'] in ['applydebuff', 'refreshdebuff', 'applybuff', 'refreshbuff'] and event['timestamp'] > end:
             # Remove from active if present
             if action in active_debuffs:
                 active_debuffs.remove(action)
 
         # Debuff fades at any time
-        elif event['type'] == 'removedebuff':
+        elif event['type'] in ['removedebuff', 'removebuff']:
             # Remove from active if present
             if action in active_debuffs:
                 active_debuffs.remove(action)
 
         # Damage tick
         elif event['type'] == 'damage':
+            # If this is radiant shield, add to the supportID
+            if action[1] == 799 and event['timestamp'] < end:
+                if event['supportID'] in tick_damage:
+                    tick_damage[event['supportID']] += event['amount']
+                else:
+                    tick_damage[event['supportID']] = event['amount']
+
             # Add damage only if it's from a snapshotted debuff
-            if action in active_debuffs:
+            elif action in active_debuffs:
                 if event['sourceID'] in tick_damage:
                     tick_damage[event['sourceID']] += event['amount']
                 else:
