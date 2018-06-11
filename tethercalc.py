@@ -109,7 +109,6 @@ def get_tethers(report, start, end):
                 tether['end'] = event['timestamp']
             # if there is no start event, add one and set it to 20s prior
             else:
-                print(max(event['timestamp'] - 20000, start))
                 tethers.append({
                     'source': event['sourceID'],
                     'target': event['targetID'],
