@@ -103,10 +103,19 @@ def get_tethers(report, start, end):
             tether_set = [tether
                       for tether in tethers
                       if tether['source'] == event['sourceID'] and 'end' not in tether]
+            # add it to the discovered tether
             if tether_set:
                 tether = tether_set[0]
-
-            tether['end'] = event['timestamp']
+                tether['end'] = event['timestamp']
+            # if there is no start event, add one and set it to 20s prior
+            else:
+                print(max(event['timestamp'] - 20000, start))
+                tethers.append({
+                    'source': event['sourceID'],
+                    'target': event['targetID'],
+                    'start': max(event['timestamp'] - 20000, start),
+                    'end': event['timestamp'],
+                })
 
     return tethers
 
