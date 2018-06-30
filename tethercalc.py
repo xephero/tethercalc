@@ -46,7 +46,7 @@ def fflogs_api(call, report, options={}):
     if call not in ['fights', 'events', 'tables/damage-done']:
         return {}
 
-    api_url = 'https://beta.fflogs.com:443/v1/report/{}/{}'.format(call, report)
+    api_url = 'https://www.fflogs.com:443/v1/report/{}/{}'.format(call, report)
 
     data = fflogs_fetch(api_url, options)
 
