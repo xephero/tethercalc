@@ -253,6 +253,10 @@ def get_tick_damages(report, start, end):
 
     # Wildfire handling. This part is hard
     for source, wildfire in wildfires.items():
+        # If wildfire never went off, set to 0 damage
+        if 'damage' not in wildfire:
+            wildfire['damage'] = 0
+
         # If entirely within the window, just add the real value
         if ('start' in wildfire and
                 'end' in wildfire and
