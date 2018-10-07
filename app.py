@@ -57,7 +57,12 @@ def homepage():
 
 @app.route('/about')
 def about():
-    return render_template('about.html', report_count=Report.query.count())
+    count = Report.query.count()
+
+    # Adding in truncated reports from filling up heroku's free 10k db rows
+    count += 19114
+
+    return render_template('about.html', report_count=count)
 
 @app.route('/favicon.ico')
 def favicon():
