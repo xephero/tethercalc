@@ -60,7 +60,7 @@ def about():
     count = Report.query.count()
 
     # Adding in truncated reports from filling up heroku's free 10k db rows
-    count += 19114
+    count += 28577
 
     return render_template('about.html', report_count=count)
 
