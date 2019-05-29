@@ -24,6 +24,10 @@ class Report(db.Model):
     enc_kill = db.Column(db.Boolean)
     computed = db.Column(db.DateTime, server_default=db.func.now())
 
+class Count(db.Model):
+    count_id = db.Column(db.Integer, primary_key=True)
+    total_reports = db.Column(db.Integer)
+
 def decompose_url(url):
     parts = urlparse(url)
 
@@ -40,6 +44,19 @@ def decompose_url(url):
 
     return report_id, fight_id
 
+def increment_count(db):
+    count = Count.query.get(1)
+    count.total_reports = count.total_reports + 1
+    db.session.commit()
+
+def prune_reports(db):
+    if Report.query.count() > 5:
+        # Get the computed time of the 500th report
+        delete_before = Report.query.order_by('computed').offset(2).first().computed
+
+        # Delete reports before that
+        Report.query.filter(Report.computed < delete_before).delete()
+        db.session.commit()
 
 @app.route('/', methods=['GET', 'POST'])
 def homepage():
@@ -57,12 +74,9 @@ def homepage():
 
 @app.route('/about')
 def about():
-    count = Report.query.count()
+    count = Count.query.get(1)
 
-    # Adding in truncated reports from filling up heroku's free 10k db rows
-    count += 28577
-
-    return render_template('about.html', report_count=count)
+    return render_template('about.html', report_count=count.total_reports)
 
 @app.route('/favicon.ico')
 def favicon():
@@ -110,8 +124,16 @@ def calc(report_id, fight_id):
             **encounter_info
             )
         try:
+            # Add the report
             db.session.add(report)
             db.session.commit()
+
+            # Increment count
+            increment_count(db)
+
+            # Make sure we're not over limit
+            prune_reports(db)
+
         except IntegrityError as exception:
             # This was likely added while tethercalc was running,
             # in which case we don't need to do anything besides redirect
