@@ -43,7 +43,7 @@ def fflogs_api(call, report, options={}):
     """
     Makes a call to the FFLogs API and returns a dictionary
     """
-    if call not in ['fights', 'events', 'tables/damage-done']:
+    if call not in ['fights', 'events/summary', 'tables/damage-done']:
         return {}
 
     api_url = 'https://www.fflogs.com:443/v1/report/{}/{}'.format(call, report)
@@ -85,7 +85,7 @@ def get_tethers(report, start, end):
         'filter': 'ability.id=1001454' # Left Eye
     }
 
-    event_data = fflogs_api('events', report, options)
+    event_data = fflogs_api('events/summary', report, options)
 
     tethers = []
 
@@ -177,7 +177,7 @@ def get_tick_damages(report, start, end):
         # 6. include radiant shield damage
     }
 
-    tick_data = fflogs_api('events', report, options)
+    tick_data = fflogs_api('events/summary', report, options)
 
     # Active debuff window. These will be the debuffs whose damage will count, because they
     # were applied within the tether window. List of tuples (sourceID, abilityID)
