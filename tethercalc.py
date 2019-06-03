@@ -191,6 +191,10 @@ def get_tick_damages(report, start, end):
     wildfires = {}
 
     for event in tick_data['events']:
+        # Fix rare issue where full source is reported instead of just sourceID
+        if 'sourceID' not in event and 'source' in event and 'id' in event['source']:
+            event['sourceID'] = event['source']['id']
+
         action = (event['sourceID'], event['ability']['guid'])
 
         # Record wildfires but skip processing for now
