@@ -137,7 +137,7 @@ def get_damages(report, start, end):
 
     return damages
 
-def get_tick_damages(report, start, end):
+def get_tick_damages(report, version, start, end):
     """
     Gets the damage each player caused between start and end from tick damage
     that was snapshotted in the start-end window
@@ -161,7 +161,7 @@ def get_tick_damages(report, start, end):
                     (
                         type="applybuff" or type="refreshbuff" or type="removebuff"
                     ) and (
-                        ability.id=1000190 or ability.id=1000749 or ability.id=1000501
+                        ability.id=1000190 or ability.id=1000749 or ability.id=1000501 or ability.id=1001205
                     )
                 ) or (
                     type="damage" and ability.id=799
@@ -187,7 +187,7 @@ def get_tick_damages(report, start, end):
     # debuffs applied during the window
     tick_damage = {}
 
-    # Wildfire instances. These get special handling after
+    # Wildfire instances. These get special handling afterwards, for stormblood logs
     wildfires = {}
 
     for event in tick_data['events']:
@@ -197,8 +197,8 @@ def get_tick_damages(report, start, end):
 
         action = (event['sourceID'], event['ability']['guid'])
 
-        # Record wildfires but skip processing for now
-        if event['ability']['guid'] == 1000861:
+        # Record wildfires but skip processing for now. Only for stormblood logs
+        if event['ability']['guid'] == 1000861 and version < 20:
             if event['sourceID'] in wildfires:
                 wildfire = wildfires[event['sourceID']]
             else:
@@ -232,11 +232,9 @@ def get_tick_damages(report, start, end):
             if action in active_debuffs:
                 active_debuffs.remove(action)
 
-        # Debuff fades at any time
-        elif event['type'] in ['removedebuff', 'removebuff']:
-            # Remove from active if present
-            if action in active_debuffs:
-                active_debuffs.remove(action)
+        # Debuff fades don't have to be removed. Wildfire (ShB) will occasionally
+        # log its tick damage after the fade event, so faded debuffs that deal
+        # damage should still be included as implicitly belonging to the last application
 
         # Damage tick
         elif event['type'] == 'damage':
@@ -254,8 +252,9 @@ def get_tick_damages(report, start, end):
                 else:
                     tick_damage[event['sourceID']] = event['amount']
 
-
     # Wildfire handling. This part is hard
+    # There will be no wildfires for shadowbringers logs, since they are handled
+    # as a normal DoT tick.
     for source, wildfire in wildfires.items():
         # If wildfire never went off, set to 0 damage
         if 'damage' not in wildfire:
@@ -370,6 +369,8 @@ def tethercalc(report, fight_id):
 
     report_data = fflogs_api('fights', report)
 
+    version = report_data['logVersion']
+
     fight = [fight for fight in report_data['fights'] if fight['id'] == fight_id][0]
 
     if not fight:
@@ -395,7 +396,6 @@ def tethercalc(report, fight_id):
     if not tethers:
         raise TetherCalcException("No tethers found in fight")
 
-    # Results
     results = []
 
     for tether in tethers:
@@ -409,8 +409,8 @@ def tethercalc(report, fight_id):
         # Easy part: non-dot damage done in window
         damages = get_damages(report, tether['start'], tether['end'])
 
-        # Hard part: snapshotted dot ticks, including wildfire
-        tick_damages = get_tick_damages(report, tether['start'], tether['end'])
+        # Hard part: snapshotted dot ticks, including wildfire for logVersion <20
+        tick_damages = get_tick_damages(report, version, tether['start'], tether['end'])
 
         # Combine the two
         real_damages = get_real_damages(damages, tick_damages)
