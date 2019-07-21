@@ -16,7 +16,7 @@ flask = "*"
 flask-migrate = "*"
 flask-sqlalchemy = "*"
 gunicorn = "*"
-"psycopg2" = "*"
+"psycopg2-binary" = "*"
 
 
 [requires]
