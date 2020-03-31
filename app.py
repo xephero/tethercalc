@@ -50,9 +50,9 @@ def increment_count(db):
     db.session.commit()
 
 def prune_reports(db):
-    if Report.query.count() > 5:
+    if Report.query.count() > 9500:
         # Get the computed time of the 500th report
-        delete_before = Report.query.order_by('computed').offset(2).first().computed
+        delete_before = Report.query.order_by('computed').offset(500).first().computed
 
         # Delete reports before that
         Report.query.filter(Report.computed < delete_before).delete()
