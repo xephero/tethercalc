@@ -122,6 +122,7 @@ def get_damages(report, start, end):
     """
     Gets non-tick, non-pet damage caused between start and end
     """
+    # TODO: this should use calculateddamage events instead of damage-done table for higher accuracy
     options = {
         'start': start,
         'end': end,
@@ -161,7 +162,8 @@ def get_tick_damages(report, version, start, end):
                     (
                         type="applybuff" or type="refreshbuff" or type="removebuff"
                     ) and (
-                        ability.id=1000190 or ability.id=1000749 or ability.id=1000501 or ability.id=1001205
+                        ability.id=1000190 or ability.id=1000749 or ability.id=1000501 or
+                        ability.id=1001205 or ability.id=1002706
                     )
                 ) or (
                     type="damage" and ability.id=799
@@ -174,6 +176,7 @@ def get_tick_damages(report, version, start, end):
         # 3. include debuff events
         # 4. include individual dot ticks on enemy
         # 5. include only buffs corresponding to ground effect dots
+        #    (shadow flare, salted earth, doton, flamethrower, slipstream)
         # 6. include radiant shield damage
     }
 
@@ -402,7 +405,7 @@ def tethercalc(report, fight_id):
         # If a tether is missing a start/end event for some reason, use the start/end of fight
         if 'start' not in tether:
             tether['start'] = encounter_start
-       
+
         if 'end' not in tether:
             tether['end'] = encounter_end
 
@@ -433,7 +436,7 @@ def tethercalc(report, fight_id):
 
         if not correct:
             correct = 'Nobody?'
-        
+
         results.append({
             'damages': damage_list,
             'timing': str(timing)[2:11],
