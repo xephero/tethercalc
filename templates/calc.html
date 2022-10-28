@@ -30,7 +30,7 @@
                 </thead>
                 <tbody>
                     {% for damage in result['damages'] %}
-                    {% if damage[0] != result['source'] and friends[damage[0]]['type'] != 'LimitBreak' %}
+                    {% if damage[0] != result['source'] and damage[0] in friends and friends[damage[0]]['type'] != 'LimitBreak' %}
                         <tr>
                             <td>{{ friends[damage[0]]['name'] }}</td>
                             <td>{{ friends[damage[0]]['type'] }}</td>
