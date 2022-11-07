@@ -60,6 +60,7 @@ def prune_reports(db):
 
 @app.route('/', methods=['GET', 'POST'])
 def homepage():
+    return redirect("https://tethercalc.com", code=301)
     """Simple form for redirecting to a report, no validation"""
     if request.method == 'POST':
         report_url = request.form['report_url']
